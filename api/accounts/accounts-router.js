@@ -7,8 +7,15 @@ const mw = require('./accounts-middleware')
 // Endpoints
 router.get('/', async (req, res, next) => {
     // `[GET] /api/accounts` returns an array of accounts (or an empty array if there aren't any).
+    let { sortby, sortdir, limit } = req.query
+    sortby = (sortby === 'name' || sortby === 'budget') ? sortby : 'id'
+    sortdir = (sortdir === 'desc') ? sortdir : 'asc'
+    limit = (Number.isInteger(parseInt(limit))) ? limit : null
+
     try {
-        const accounts = await Accounts.getAll()
+        const accounts = limit 
+            ? await Accounts.getAll().orderBy(sortby, sortdir).limit(limit) 
+            : await Accounts.getAll().orderBy(sortby, sortdir)
         res.status(200).json(accounts)
     }
     catch (err) {
